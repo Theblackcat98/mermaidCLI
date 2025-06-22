@@ -155,7 +155,7 @@ class MermaidParser {
   }
 
   parseStateLine(line) {
-    const stateRegex = /([A-Za-z0-9_]+)\s*-->\s*([A-Za-z0-9_]+)(?:\s*:\s*(.+))?/;
+    const stateRegex = /(\[\*\]|[A-Za-z0-9_]+)\s*-->\s*(\[\*\]|[A-Za-z0-9_]+)(?:\s*:\s*(.+))?/;
     const match = line.match(stateRegex);
 
     if (match) {
@@ -242,16 +242,28 @@ class MermaidParser {
 
   addStateNode(id, label) {
     if (!this.nodes.has(id)) {
-      const nodeLabel = label || id;
-      this.nodes.set(id, {
-        id,
-        label: nodeLabel,
-        x: 0,
-        y: 0,
-        width: Math.max(nodeLabel.length + 4, 10),
-        height: 3,
-        shape: 'roundedRect'
-      });
+      if (id === '[*]') {
+        this.nodes.set(id, {
+          id,
+          label: '',
+          x: 0,
+          y: 0,
+          width: 3,
+          height: 3,
+          shape: 'rhombus'
+        });
+      } else {
+        const nodeLabel = label || id;
+        this.nodes.set(id, {
+          id,
+          label: nodeLabel,
+          x: 0,
+          y: 0,
+          width: Math.max(nodeLabel.length + 4, 10),
+          height: 3,
+          shape: 'roundedRect'
+        });
+      }
     }
   }
 
@@ -517,7 +529,7 @@ class ASCIIRenderer {
 
       const midX = fromX + Math.floor((toX - fromX) / 2);
 
-      for (let x = fromX + 1; x <= midX; x++) this.setChar(x, fromY, '-');
+      for (let x = fromX; x <= midX; x++) this.setChar(x, fromY, '-');
       for (let x = midX; x < toX; x++) this.setChar(x, toY, '-');
 
       const minY = Math.min(fromY, toY);
@@ -527,45 +539,69 @@ class ASCIIRenderer {
       if (fromY !== toY) {
         this.setChar(midX, fromY, '+');
         this.setChar(midX, toY, '+');
-      } else {
-        this.setChar(midX, fromY, '-'); // Straight line
       }
 
       this.setChar(toX - 1, toY, '>');
+      this.setChar(toX, toY, '>');
     } else { // Default to TD
       const fromX = fromNode.x + Math.floor(fromNode.width / 2);
-      const fromY = fromNode.y + fromNode.height - 1;
       const toX = toNode.x + Math.floor(toNode.width / 2);
-      const toY = toNode.y;
+      const isUpward = toNode.y < fromNode.y;
 
-      const midY = fromY + Math.floor((toY - fromY) / 2);
+      const fromY_boundary = isUpward ? fromNode.y : fromNode.y + fromNode.height - 1;
+      const toY_boundary = isUpward ? toNode.y + toNode.height - 1 : toNode.y;
 
-      for (let y = fromY + 1; y <= midY; y++) this.setChar(fromX, y, '|');
+      const fromY_start = isUpward ? fromY_boundary - 1 : fromY_boundary + 1;
+      const toY_end = isUpward ? toY_boundary + 1 : toY_boundary - 1;
 
-      const minX = Math.min(fromX, toX);
-      const maxX = Math.max(fromX, toX);
-      for (let x = minX; x <= maxX; x++) this.setChar(x, midY, '-');
+      const midY = Math.floor((fromY_start + toY_end) / 2);
 
-      for (let y = midY; y < toY; y++) this.setChar(toX, y, '|');
-
-      if (fromX !== toX) {
-        this.setChar(fromX, midY, '+');
-        this.setChar(toX, midY, '+');
-      } else {
-        this.setChar(fromX, midY, '|'); // Straight line
+      // Vertical line from fromNode
+      for (let y = Math.min(fromY_start, midY); y <= Math.max(fromY_start, midY); y++) {
+        this.setChar(fromX, y, '|');
+      }
+      
+      // Horizontal line
+      for (let x = Math.min(fromX, toX); x <= Math.max(fromX, toX); x++) {
+        this.setChar(x, midY, '-');
       }
 
-      this.setChar(toX, toY - 1, 'v');
+      // Vertical line to toNode
+      for (let y = Math.min(toY_end, midY); y <= Math.max(toY_end, midY); y++) {
+        this.setChar(toX, y, '|');
+      }
+      
+      // Arrowhead at toNode boundary
+      this.setChar(toX, toY_boundary, isUpward ? '^' : 'v');
     }
   }
 
   setChar(x, y, char) {
     if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-      // Prioritize characters to prevent lines from overwriting nodes
-      // A corner '+' can overwrite a simple line '|' or '-'
       const existing = this.canvas[y][x];
-      if (existing === ' ' || (char === '+' && (existing === '|' || existing === '-'))) {
+
+      // Allow drawing on empty space
+      if (existing === ' ') {
         this.canvas[y][x] = char;
+        return;
+      }
+
+      // Form corners
+      if ((existing === '|' && char === '-') || (existing === '-' && char === '|')) {
+        this.canvas[y][x] = '+';
+        return;
+      }
+      
+      // Let corners overwrite lines
+      if (char === '+' && (existing === '|' || existing === '-')) {
+        this.canvas[y][x] = '+';
+        return;
+      }
+
+      // Let arrowheads overwrite lines/corners
+      if ("v^<>".includes(char) && "|-+".includes(existing)) {
+        this.canvas[y][x] = char;
+        return;
       }
     }
   }
