@@ -48,7 +48,7 @@ cat [file.mmd] | node src/cli/index.js [options]
 
 ### Pocketflow Diagram
 
-<img alt="Pocketflow Diagram" src="https://github.com/Theblackcat98/mermaidCLI/raw/master/assets/pocketflow-dmm.gif" width="1000" />
+<img alt="Pocketflow Diagram" src="https://github.com/Theblackcat98/mermaidCLI/raw/master/assets/pocketflow-dmm.gif" width="1100" />
 
 ### Notes
 * The GIFs were created using [vhs](https://github.com/charmbracelet/vhs).
