@@ -31,3 +31,26 @@ cat [file.mmd] | node src/cli/index.js [options]
 - `-h, --help`: Show the help message.
 - `-o, --output <file>`: Write the output to a file instead of stdout.
 - `-v, --verbose`: Enable verbose logging.
+
+## Current Limitations
+
+- The tool currently only supports rendering of state and sequence diagrams. Flowchart support is experimental.
+
+## Examples
+
+### State Diagram
+
+![State Diagram](assets/state-dmm.gif)
+
+### Sequence Diagram
+
+![Sequence Diagram](assets/sequence-dmm.gif)
+
+### Pocketflow Diagram
+
+![Pocketflow Diagram](assets/pocketflow-dmm.gif)
+
+### Notes
+* The GIFs were created using [vhs](https://github.com/charmbracelet/vhs).
+* The PocketFlow diagram is from [The-Pocket/PocketFlow](https://github.com/The-Pocket/PocketFlow).
+
