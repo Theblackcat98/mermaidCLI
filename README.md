@@ -40,15 +40,15 @@ cat [file.mmd] | node src/cli/index.js [options]
 
 ### State Diagram
 
-![State Diagram](assets/state-dmm.gif)
+<img alt="State Diagram" src="https://github.com/Theblackcat98/mermaidCLI/raw/master/assets/state-dmm.gif" width="600" />
 
 ### Sequence Diagram
 
-![Sequence Diagram](assets/sequence-dmm.gif)
+<img alt="Sequence Diagram" src="https://github.com/Theblackcat98/mermaidCLI/raw/master/assets/sequence-dmm.gif" width="600" />
 
 ### Pocketflow Diagram
 
-![Pocketflow Diagram](assets/pocketflow-dmm.gif)
+<img alt="Pocketflow Diagram" src="https://github.com/Theblackcat98/mermaidCLI/raw/master/assets/pocketflow-dmm.gif" width="600" />
 
 ### Notes
 * The GIFs were created using [vhs](https://github.com/charmbracelet/vhs).
